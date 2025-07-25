@@ -1,11 +1,11 @@
 # Agentic Call Center sample
 
-| ![Example chat with the Chainlit interface](assets/chat.png) | ![Example chat with WhatsApp](assets/whatsapp.png) |
-| --- | --- |
+| ![Example chat with the Chainlit interface](assets/chat.png) |
+| --- |
 
 ## Overview
 
-This sample application demonstrates how to use of Vanilla AI Agents framework to build a basic call center in the context of a generic TelCo company. It features a phone call and WhatsApp integration (via Azure Communication Services) to offer a more realistic, multi-channel experience.
+This sample application demonstrates how to use of Vanilla AI Agents framework to build a basic call center in the context of a generic TelCo company.
 
 The application leverages [**Vanilla AI Agents**](https://github.com/Azure-Samples/vanilla-aiagents) framework at its core to implement and orchestrate the agents' behavior. The agents are implemented as a separate microservice that can be scaled independently from the rest of the application.
 
@@ -17,11 +17,6 @@ The application leverages [**Vanilla AI Agents**](https://github.com/Azure-Sampl
 graph TD
     subgraph Frontend
         A[Web Interface - Chainlit]
-        B[WhatsApp]
-        K[Phone]
-        F[Azure Event Grid]
-        G[Azure Communication Services]
-        J[Azure Function]
     end
 
     subgraph Backend
@@ -40,15 +35,10 @@ graph TD
     A -->|HTTP| C
     C -->|HTTP| D
     C -->|Persist| E
-    B -->|Event| G
-    K -->|Event| G
-    G -->|Trigger| F
     C -->|Hosted on| H
     D -->|Hosted on| H
     D -->|Query| E
     D -->|Query| I
-    F -->|Event| J
-    J -->|HTTP| C
 ```
 
 ### Codebase
@@ -57,9 +47,7 @@ The codebase is structured as follows:
 
 - `api/` contains the main business logic exposed as a REST API with FastAPI.
 - `telco-team/` contains the agent team that simulate the call center agents.
-- `ui/` contains a simple web interface to interact with the call center agents using Chainlit.
-- `functions/` contains the Azure Functions that handle the WhatsApp integration.
-- `voice/` contains code handling phone call integration.
+- `ui/` contains a simple web interface to interact with the aall center agents using Chainlit.
 - `infra/` contains the Azure Bicep templates to deploy the application.
 
 ### Azure Services
@@ -71,7 +59,6 @@ The following Azure services are used in this sample application:
 - `Azure Cosmos DB` to store the chat messages.
 - `Azure AI Search` to enable RAG.
 - `Azure OpenAI` to support the GenAI agents.
-- `Azure Communication Services` and `Azure Service Bus+EventGrid` to interface via WhatsApp and handle phone calls.
 
 ## Deployment
 
@@ -84,20 +71,6 @@ Most straitforward way to deploy this application is to use **Azure Developer CL
 1. Run `azd up` to deploy the application.
 > [!NOTE]
 > The deployment process will take some time to complete. You can monitor the progress in the terminal. Once the deployment is finished, all environment variables will be available in `.azure/<env name>/.env` file.
-
-### Phone calling integration
-> [!WARNING] Purchasing phone numbers cannot be automated at this time. You will need to follow the instructions in the [Azure Communication Services documentation](https://learn.microsoft.com/en-us/azure/communication-services/quickstarts/voice-calling/get-started?pivots=programming-language-python) to purchase a phone number and configure it.
-
-Infrastructure for phone calling integration is already deployed via EventGrid Webhook subscription to the `voice` Container App.
-
-### WhatsApp integration
-
-> [!WARNING]
-> At this time there is no automated way to fully deploy the WhatsApp integration. You will need to follow the instructions in the [Azure Communication Services documentation](https://learn.microsoft.com/en-us/azure/communication-services/quickstarts/advanced-messaging/whatsapp/connect-whatsapp-business-account) to configure a phone number, associated it with WhatsApp Business profile and create a WhatsApp channel.
-
-Two EventGrid subscription are already created for you, delivering to Service Bus Queues: one for incoming SMS (required to validate phone number) and one for incoming WhatsApp messages (polled by the Azure Function).
-
-Update the `ACS_CHANNEL_REGISTRATION_ID` environment variable in the Azure Container Apps settings to match it, in order to send responses back.
 
 ## Local development
 
@@ -118,9 +91,3 @@ To run the application locally, follow these steps:
     1. Run the agents host with `invoke start-host`
     1. Run the FastAPI API with `invoke start-api`
     1. Run the Chainlit UI with `invoke start-chat`
-
-> [!NOTE]
-> Running **Voice calling** integration locally is not covered in this guide.
-
-> [!NOTE]
-> Running **WhatsApp** integration locally can be done by running the Azure Function locally, but you'll need to stop the Azure Function in the cloud to avoid conflicts.

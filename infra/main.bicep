@@ -125,18 +125,6 @@ module acs './acs.bicep' = {
   }
 }
 
-module speech './speech.bicep' = {
-  name: 'speech'
-  scope: rg
-  params: {
-    uniqueId: uniqueId
-    prefix: prefix
-    userAssignedIdentityPrincipalId: uami.outputs.principalId
-    acsIdentityPrincipalId: acs.outputs.acsIdentityId
-    location: location
-  }
-}
-
 module storage './storage.bicep' = {
   name: 'storage'
   scope: rg
@@ -180,10 +168,8 @@ module aca './aca.bicep' = {
     cosmosDbEndpoint: cosmosdb.outputs.cosmosDbEndpoint
     openAiApiKey: '' // Force ManId, otherwise set openAI.listKeys().key1
     openAiEndpoint: openAI.outputs.openAIEndpoint
-    speechServiceKey: speech.outputs.speechServiceKey
     userAssignedIdentityClientId: uami.outputs.clientId
     acsEndpoint: acs.outputs.acsEndpoint
-    cognitiveServiceEndpoint: speech.outputs.speechServiceEndpoint
     serviceBusNamespaceFqdn: acs.outputs.sbNamespaceFQDN
     searchEndpoint: search.outputs.endpoint
     searchIndexName: searchIndexName
@@ -221,8 +207,4 @@ output AZURE_SEARCH_ADMIN_KEY string = search.outputs.adminKey
 output AZURE_OPENAI_WHISPER_VERSION string = openAIWhisperVersion
 output AZURE_OPENAI_WHISPER_ENDPOINT string = openAI.outputs.openAIEndpoint
 output AZURE_OPENAI_WHISPER_DEPLOYMENT string = openAIWhisperModel
-output SPEECH_KEY string = speech.outputs.speechServiceKey
-output COGNITIVE_SERVICES_ENDPOINT string = speech.outputs.speechServiceEndpoint
 output SPEECH_REGION string = location
-output VOICE_WEBHOOK_URL string = 'https://${aca.outputs.voiceEndpoint}/api/call'
-output VOICE_SUBSCRIPTION_NAME string = '${prefix}-call-sub-${uniqueId}'

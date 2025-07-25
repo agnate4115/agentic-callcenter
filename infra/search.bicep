@@ -25,7 +25,7 @@ resource search 'Microsoft.Search/searchServices@2024-06-01-preview' = {
     partitionCount: 1
     hostingMode: 'default'
     semanticSearch: 'standard'
-    disableLocalAuth: true // Force Azure AD auth
+    disableLocalAuth: false // Force Azure AD auth
   }
 }
 

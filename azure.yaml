@@ -23,13 +23,6 @@ services:
         docker:
             path: telcoteam.dockerfile
             remoteBuild: true
-    voice:
-        project: voice
-        host: containerapp
-        language: python
-        docker:
-            path: voice.dockerfile
-            remoteBuild: true
     functions:
         project: functions
         host: containerapp
@@ -54,7 +47,6 @@ hooks:
         shell: pwsh
         run: |
             .\.venv\Scripts\Activate
-            python ./infra/scripts/setup_voice_webhook.py
             
             cd telco-team && pip install -r requirements.txt
             cd ../api && pip install -r requirements.txt
