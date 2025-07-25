@@ -51,7 +51,6 @@ async def ask_agents(input_message, conversation_id):
         new_messages = await response.json()
         return new_messages
 
-from azure.eventgrid import EventGridEvent, SystemEventNames
 from azure.core.messaging import CloudEvent
 from azure.communication.callautomation import (
     PhoneNumberIdentifier,
@@ -65,59 +64,6 @@ from azure.communication.callautomation.aio import (
     )
 call_automation_client = CallAutomationClient(endpoint=os.getenv("ACS_ENDPOINT"), credential=DefaultAzureCredential())
 COGNITIVE_SERVICE_ENDPOINT = os.getenv("COGNITIVE_SERVICE_ENDPOINT")
-
-@app.post("/api/call")
-async def incoming_call_handler(req: Request):
-    try:
-        for event_dict in await req.json():
-            event = EventGridEvent.from_dict(event_dict)
-            logger.info("Incoming event data: %s", event.data)
-            
-            # Handle the initial validation event from EventGrid
-            # This is performed once when the subscription is created
-            if event.event_type == SystemEventNames.EventGridSubscriptionValidationEventName:
-                logger.info("Validating WebHook subscription")
-                validation_url = event.data['validationUrl']
-                validation_code = event.data['validationCode']
-                async with aiohttp.ClientSession() as client:
-                    await client.get(validation_url)
-                
-                return JSONResponse(content={"validationResponse": validation_code}, status_code=200)
-            
-            # Handle the incoming call event
-            elif event.event_type =="Microsoft.Communication.IncomingCall":
-                logger.info("Incoming call received: data=%s", event.data)  
-                if event.data['from']['kind'] =="phoneNumber":
-                    caller_id =  event.data['from']["phoneNumber"]["value"]
-                else :
-                    caller_id =  event.data['from']['rawId'] 
-                logger.info("incoming call handler caller id: %s", caller_id)
-                
-                call_id = uuid.uuid4()
-                
-                query_parameters = urlencode({ "callerId": caller_id })
-                # Quick way to get the callback url from current request full URL, without knowing the host
-                original_uri = str(req.url)
-                # Must use https for callback url since it is required by ACS
-                # See https://learn.microsoft.com/en-us/azure/communication-services/resources/troubleshooting/voice-video-calling/troubleshooting-codes?pivots=calling#troubleshooting-tips
-                callback_uri = original_uri.replace("/api/call", f"/api/call/{call_id}?{query_parameters}").replace("http://", "https://")     
-                logger.info("callback url: %s",  callback_uri)
-                
-                incoming_call_context = event.data['incomingCallContext']
-                answer_call_result = await call_automation_client.answer_call(
-                    incoming_call_context=incoming_call_context,
-                    cognitive_services_endpoint=COGNITIVE_SERVICE_ENDPOINT,
-                    callback_url=callback_uri)
-                
-                logger.info("Answered call for connection id: %s", answer_call_result.call_connection_id)
-                return JSONResponse(status_code=200, content="")
-            else:
-                logger.warning("Event type not supported: %s", event.event_type)
-            
-        return JSONResponse(status_code=200, content="")
-    except Exception as ex:
-        logger.error(f"Error in incoming_call_handler: {ex}")
-        return JSONResponse(status_code=500, content=str(ex))
 
 VOICE_NAME = os.getenv("VOICE_NAME", "en-US-AvaMultilingualNeural")
 async def reply_and_wait(replyText, callerId, call_connection_id, context=""):

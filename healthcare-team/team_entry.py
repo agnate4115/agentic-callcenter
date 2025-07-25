@@ -1,10 +1,10 @@
 from typing import Dict, List, Tuple
 from vanilla_aiagents.team import Team
 from user_proxy_agent import user_proxy_agent
-from sales_agent import sales_agent
+from therapist_agent import therapist_agent
 from activation_agent import activation_agent
 from planner_agent import planner_agent
-from support_agent import technical_support_agent
+from report_agent import report_agent
 from config import llm
 
 system_message_manager="""
@@ -16,9 +16,9 @@ system_message_manager="""
     NEVER call Customer immediately after Executor
     """
 team = Team(
-    id="telco-team",
-    description="A group chat with multiple agents",
-    members=[user_proxy_agent, planner_agent, sales_agent, activation_agent, technical_support_agent],
+    id="healthcare-team",
+    description="A group chat with multiple agents for healthcare",
+    members=[user_proxy_agent, planner_agent, therapist_agent, activation_agent, report_agent],
     llm=llm, 
     stop_callback=lambda msgs: "terminate" in msgs[-1].get("content", "").lower(),
 )

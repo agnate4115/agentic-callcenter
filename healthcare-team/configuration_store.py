@@ -1,8 +1,9 @@
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
+from azure.core.credentials import AzureKeyCredential
 
 class ConfigurationStore:
     def __init__(self, url, key, database_name, container_name):
-        self.client = CosmosClient(url, credential=key)
+        self.client = CosmosClient(url, credential=AzureKeyCredential(key))
         self.database_name = database_name
         self.container_name = container_name
         self.db = self.client.get_database_client(database=self.database_name)
