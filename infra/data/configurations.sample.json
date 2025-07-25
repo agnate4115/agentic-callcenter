@@ -1,0 +1,19 @@
+[
+  {
+    "id": "default",
+    "configuration": {
+      "sales_agent": {
+        "llm_config": {
+          "model": "gpt-4",
+          "temperature": 0.7
+        }
+      },
+      "support_agent": {
+        "llm_config": {
+          "model": "gpt-4",
+          "temperature": 0.7
+        }
+      }
+    }
+  }
+]
